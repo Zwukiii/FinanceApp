@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:8081")
 @RestController
 @RequestMapping("/api/budgets")
 public class BudgetController {
@@ -76,4 +75,6 @@ public class BudgetController {
                 .map(budgetMapper::toDTO)
                 .toList();
     }
+
+
 }
