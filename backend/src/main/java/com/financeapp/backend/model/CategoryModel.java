@@ -16,9 +16,11 @@ public class CategoryModel {
     @Id
     @Column(nullable = false)
     private long id;
+
     @NotBlank
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TransactionType type;
