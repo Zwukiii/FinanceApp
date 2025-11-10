@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 
-@CrossOrigin(origins = "http://localhost:8081")
 @RestController
 @RequestMapping("/api/investments")
 public class InvestmentController {

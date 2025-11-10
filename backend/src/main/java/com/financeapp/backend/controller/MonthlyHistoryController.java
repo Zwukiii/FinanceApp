@@ -13,7 +13,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/history")
-@CrossOrigin(origins = "http://localhost:8081")
 public class MonthlyHistoryController {
 
     private final MonthlyHistoryService monthlyHistoryService;

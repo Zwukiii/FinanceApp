@@ -12,7 +12,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
@@ -22,15 +24,18 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+    private final JwtService jwtService;
 
     public AuthenticationService(UserRepository userRepository,
                                  AuthenticationManager authenticationManager,
                                  PasswordEncoder passwordEncoder,
-                                 EmailService emailService) {
+                                 EmailService emailService,
+                                 JwtService jwtService) {
         this.userRepository = userRepository;
         this.authenticationManager = authenticationManager;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.jwtService = jwtService;
     }
 
     public User signup(RegisterUserDTO input) {
@@ -79,7 +84,6 @@ public class AuthenticationService {
         userRepository.save(user);
     }
 
-
     public void resendVerificationCode(String email) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isEmpty()) throw new RuntimeException("User not found");
@@ -90,8 +94,6 @@ public class AuthenticationService {
         sendVerificationEmail(user);
         userRepository.save(user);
     }
-
-    // sends the verifaction code to email.
 
     private void sendVerificationEmail(User user) {
         String subject = "Account Verification";
@@ -106,8 +108,6 @@ public class AuthenticationService {
         }
     }
 
-
-    //Generates our verfication code
     private String generateVerificationCode() {
         Random random = new Random();
         int code = random.nextInt(900000) + 100000;

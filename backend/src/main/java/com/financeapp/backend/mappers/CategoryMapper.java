@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CategoryMapper {
+
+    // Converts our dto to entities for our DB
     public CategoryModel dtoToEntity(CategoryRequestDTO input) {
         if (input == null) {
             return null;
@@ -19,7 +21,7 @@ public class CategoryMapper {
 
         return category;
     }
-
+    // Converts entity to DTO
     public static CategoryResponseDTO entityToDto(CategoryModel entity) {
         if (entity == null) {
             return null;
@@ -32,7 +34,7 @@ public class CategoryMapper {
 
     }
 
-    public void updateEntityFromDto(CategoryRequestDTO dto, CategoryModel update) {
+    public void updateEntityFromDto(CategoryRequestDTO dto, CategoryModel category) {
         category.setName(dto.getName());
         category.setType(dto.getType());
 

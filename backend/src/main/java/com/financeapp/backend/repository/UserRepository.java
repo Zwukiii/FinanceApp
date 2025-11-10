@@ -14,4 +14,6 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
 
 
+
+    Optional<Object> findByEmailIgnoreCase(String email);
 }

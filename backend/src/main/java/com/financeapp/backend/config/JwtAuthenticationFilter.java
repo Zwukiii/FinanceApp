@@ -1,5 +1,6 @@
 package com.financeapp.backend.config;
 
+import com.financeapp.backend.services.CustomUserDetailsService;
 import com.financeapp.backend.services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,7 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -23,12 +23,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final HandlerExceptionResolver handlerExceptionResolver;
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
+    private final CustomUserDetailsService userDetailsService;
 
     public JwtAuthenticationFilter(
             HandlerExceptionResolver handlerExceptionResolver,
             JwtService jwtService,
-            UserDetailsService userDetailsService
+            CustomUserDetailsService userDetailsService
     ) {
         this.handlerExceptionResolver = handlerExceptionResolver;
         this.jwtService = jwtService;
@@ -47,9 +47,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             }
+
             final String jwt = authHeader.substring(7);
             final String userEmail = jwtService.extractUsername(jwt);
             Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
+
             if (userEmail != null && currentAuth == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
                 if (jwtService.isTokenValid(jwt, userDetails)) {
@@ -63,6 +65,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             }
+
             filterChain.doFilter(request, response);
         } catch (Exception ex) {
             handlerExceptionResolver.resolveException(request, response, null, ex);
