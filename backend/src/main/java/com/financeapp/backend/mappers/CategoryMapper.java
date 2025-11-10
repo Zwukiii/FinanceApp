@@ -1,7 +1,7 @@
 package com.financeapp.backend.mappers;
 
-import com.financeapp.backend.DTO.CategoryRequestDTO;
-import com.financeapp.backend.DTO.CategoryResponseDTO;
+import com.financeapp.backend.DTO.category.CategoryRequestDTO;
+import com.financeapp.backend.DTO.category.CategoryResponseDTO;
 import com.financeapp.backend.model.CategoryModel;
 import org.springframework.stereotype.Component;
 

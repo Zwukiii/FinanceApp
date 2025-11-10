@@ -1,19 +1,16 @@
 package com.financeapp.backend.controller;
 
-import com.financeapp.backend.DTO.TransactionRequestDTO;
-import com.financeapp.backend.DTO.TransactionResponseDTO;
+import com.financeapp.backend.DTO.transaction.TransactionRequestDTO;
+import com.financeapp.backend.DTO.transaction.TransactionResponseDTO;
 import com.financeapp.backend.mappers.TransactionMapper;
 import com.financeapp.backend.model.TransactionModel;
 import com.financeapp.backend.services.MonthlyHistoryService;
 import com.financeapp.backend.services.TransactionService;
-import jakarta.transaction.Transaction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @CrossOrigin(origins = "http://localhost:8081")

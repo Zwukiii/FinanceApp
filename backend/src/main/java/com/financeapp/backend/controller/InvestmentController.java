@@ -1,7 +1,7 @@
 package com.financeapp.backend.controller;
 
-import com.financeapp.backend.DTO.InvestmentRequestDTO;
-import com.financeapp.backend.DTO.InvestmentResponseDTO;
+import com.financeapp.backend.DTO.investment.InvestmentRequestDTO;
+import com.financeapp.backend.DTO.investment.InvestmentResponseDTO;
 import com.financeapp.backend.mappers.InvestmentMapper;
 import com.financeapp.backend.model.InvestmentModel;
 import com.financeapp.backend.services.InvestmentService;

@@ -1,6 +1,6 @@
 package com.financeapp.backend.services;
 
-import com.financeapp.backend.DTO.BudgetRequestDTO;
+import com.financeapp.backend.DTO.budget.BudgetRequestDTO;
 import com.financeapp.backend.mappers.BudgetMapper;
 import com.financeapp.backend.model.BudgetModel;
 import com.financeapp.backend.repository.BudgetRepository;

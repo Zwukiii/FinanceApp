@@ -1,7 +1,7 @@
 package com.financeapp.backend.mappers;
 
-import com.financeapp.backend.DTO.BudgetRequestDTO;
-import com.financeapp.backend.DTO.BudgetResponseDTO;
+import com.financeapp.backend.DTO.budget.BudgetRequestDTO;
+import com.financeapp.backend.DTO.budget.BudgetResponseDTO;
 import com.financeapp.backend.model.BudgetModel;
 import org.springframework.stereotype.Component;
 

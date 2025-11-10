@@ -1,8 +1,8 @@
 package com.financeapp.backend.controller;
 
-import com.financeapp.backend.DTO.LoginUserDTO;
-import com.financeapp.backend.DTO.RegisterUserDTO;
-import com.financeapp.backend.DTO.VerifyUserDto;
+import com.financeapp.backend.DTO.jwt.LoginUserDTO;
+import com.financeapp.backend.DTO.jwt.RegisterUserDTO;
+import com.financeapp.backend.DTO.jwt.VerifyUserDto;
 import com.financeapp.backend.model.User;
 import com.financeapp.backend.responses.LoginResponse;
 import com.financeapp.backend.services.AuthenticationService;

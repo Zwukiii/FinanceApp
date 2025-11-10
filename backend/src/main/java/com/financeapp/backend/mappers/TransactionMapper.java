@@ -1,7 +1,7 @@
 package com.financeapp.backend.mappers;
 
-import com.financeapp.backend.DTO.TransactionRequestDTO;
-import com.financeapp.backend.DTO.TransactionResponseDTO;
+import com.financeapp.backend.DTO.transaction.TransactionRequestDTO;
+import com.financeapp.backend.DTO.transaction.TransactionResponseDTO;
 import com.financeapp.backend.model.TransactionModel;
 import org.springframework.stereotype.Component;
 

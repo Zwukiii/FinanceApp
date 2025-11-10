@@ -1,4 +1,4 @@
-package com.financeapp.backend.DTO;
+package com.financeapp.backend.DTO.budget;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,12 +9,12 @@ import java.time.LocalDate;
 @Getter
 @Setter
 
-public class BudgetResponseDTO {
-    private Long id;
+
+public class BudgetRequestDTO {
     private String category;
     private BigDecimal limitAmount;
     private BigDecimal spentAmount;
-    private BigDecimal progress;
     private LocalDate startDate;
     private LocalDate endDate;
+
 }

@@ -1,6 +1,6 @@
 package com.financeapp.backend.mappers;
 
-import com.financeapp.backend.DTO.MonthlyHistoryResponseDTO;
+import com.financeapp.backend.DTO.history.MonthlyHistoryResponseDTO;
 import com.financeapp.backend.model.MonthlyHistoryModel;
 import org.springframework.stereotype.Component;
 

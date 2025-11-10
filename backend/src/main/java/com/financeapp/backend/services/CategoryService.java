@@ -1,7 +1,7 @@
 package com.financeapp.backend.services;
 
-import com.financeapp.backend.DTO.CategoryRequestDTO;
-import com.financeapp.backend.DTO.CategoryResponseDTO;
+import com.financeapp.backend.DTO.category.CategoryRequestDTO;
+import com.financeapp.backend.DTO.category.CategoryResponseDTO;
 import com.financeapp.backend.mappers.CategoryMapper;
 import com.financeapp.backend.model.CategoryModel;
 import com.financeapp.backend.repository.CategoryRepository;

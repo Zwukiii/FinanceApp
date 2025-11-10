@@ -1,7 +1,7 @@
 package com.financeapp.backend.controller;
 
 
-import com.financeapp.backend.DTO.MonthlyHistoryResponseDTO;
+import com.financeapp.backend.DTO.history.MonthlyHistoryResponseDTO;
 import com.financeapp.backend.mappers.MonthlyHistoryMapper;
 import com.financeapp.backend.repository.MonthlyHistoryRepository;
 import com.financeapp.backend.repository.TransactionRepository;

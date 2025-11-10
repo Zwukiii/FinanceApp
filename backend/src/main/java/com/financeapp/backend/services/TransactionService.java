@@ -1,10 +1,9 @@
 package com.financeapp.backend.services;
 
-import com.financeapp.backend.DTO.TransactionRequestDTO;
+import com.financeapp.backend.DTO.transaction.TransactionRequestDTO;
 import com.financeapp.backend.mappers.TransactionMapper;
 import com.financeapp.backend.model.TransactionModel;
 import com.financeapp.backend.repository.TransactionRepository;
-import jakarta.transaction.Transaction;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.financeapp.backend.DTO;
+package com.financeapp.backend.DTO.investment;
 
 import lombok.Getter;
 import lombok.Setter;
