@@ -31,6 +31,11 @@ public class User implements UserDetails {
     private LocalDateTime verificationCodeExpiresAt;
     private boolean enabled;
 
+    @Column(name ="refresh_token")
+    private String refreshToken;
+    @Column(name = "refresh_token_expires_at")
+    private LocalDateTime refreshTokenExpiresAt;
+
     //constructor for creating an unverified user
     public User(String username, String email, String password) {
         this.username = username;

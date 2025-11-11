@@ -2,6 +2,7 @@ package com.financeapp.backend.controller;
 
 import com.financeapp.backend.DTO.jwt.LoginUserDTO;
 import com.financeapp.backend.DTO.jwt.RegisterUserDTO;
+import com.financeapp.backend.DTO.jwt.TokenRefreshDTO;
 import com.financeapp.backend.DTO.jwt.VerifyUserDto;
 import com.financeapp.backend.model.User;
 import com.financeapp.backend.responses.LoginResponse;
@@ -10,6 +11,7 @@ import com.financeapp.backend.services.JwtService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.management.RuntimeErrorException;
 import java.util.Map;
 
 @RequestMapping("/auth")
@@ -36,7 +38,11 @@ public class AuthenticationController {
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDTO loginUserDTO) {
         User authenticatedUser = authenticationService.authenticate(loginUserDTO);
         String jwtToken = jwtService.generateToken(authenticatedUser);
-        LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
+        LoginResponse loginResponse = new LoginResponse(
+                jwtToken,
+                jwtService.getExpirationTime(),
+                authenticatedUser.getRefreshToken()
+        );
         return ResponseEntity.ok(loginResponse);
     }
 
@@ -61,5 +67,16 @@ public class AuthenticationController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+     // Refresh our token so you dont need to login every time.
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshToken(@RequestBody TokenRefreshDTO request) {
+        try {
+            TokenRefreshDTO responseToken = authenticationService.tokenRefresh(request);
+            return ResponseEntity.ok(responseToken);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+        
     }
 }

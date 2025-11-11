@@ -2,6 +2,7 @@ package com.financeapp.backend.services;
 
 import com.financeapp.backend.DTO.jwt.LoginUserDTO;
 import com.financeapp.backend.DTO.jwt.RegisterUserDTO;
+import com.financeapp.backend.DTO.jwt.TokenRefreshDTO;
 import com.financeapp.backend.DTO.jwt.VerifyUserDto;
 import com.financeapp.backend.model.User;
 import com.financeapp.backend.repository.UserRepository;
@@ -14,7 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.Date;
 import java.util.Optional;
 import java.util.Random;
 
@@ -65,6 +66,10 @@ public class AuthenticationService {
         } catch (Exception e) {
             throw new BadCredentialsException("Invalid credentials");
         }
+        String refreshToken = jwtService.generateToken(user);
+        user.setRefreshToken(refreshToken);
+        user.setRefreshTokenExpiresAt(LocalDateTime.now().plusDays(7));
+        userRepository.save(user);
         return user;
     }
 
@@ -112,5 +117,22 @@ public class AuthenticationService {
         Random random = new Random();
         int code = random.nextInt(900000) + 100000;
         return String.valueOf(code);
+    }
+
+    public  TokenRefreshDTO tokenRefresh(TokenRefreshDTO input) {
+        Optional<User> optionalUser = userRepository.findByRefreshToken(input.getRefreshToken());
+        if (optionalUser.isEmpty()) throw new RuntimeException("User n ot found");
+        User user = optionalUser.get();
+
+        if (!jwtService.isTokenValid(input.getRefreshToken(), user)) {
+            throw new RuntimeException("invalid  or expired refresh token");
+        }
+
+        String tokenGenerate = jwtService.generateToken(user);
+        TokenRefreshDTO request = new TokenRefreshDTO();
+        request.setRefreshToken(input.getRefreshToken());
+        request.setAccessToken(tokenGenerate);
+        request.setExpiresIn(jwtService.getExpirationTime());
+        return request;
     }
 }
