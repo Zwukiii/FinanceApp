@@ -20,4 +20,13 @@ public class UserService {
         userRepository.findAll().forEach(users::add);
         return users;
     }
+
+    public void userDeletion(String email) {
+        User deleteUser = userRepository.findByEmail(email)
+                .orElseThrow(
+                        () -> new RuntimeException("User not found")
+                );
+        userRepository.delete(deleteUser);
+    }
+
 }

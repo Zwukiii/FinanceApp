@@ -5,10 +5,13 @@ import com.financeapp.backend.DTO.jwt.RegisterUserDTO;
 import com.financeapp.backend.DTO.jwt.TokenRefreshDTO;
 import com.financeapp.backend.DTO.jwt.VerifyUserDto;
 import com.financeapp.backend.model.User;
+import com.financeapp.backend.repository.UserRepository;
 import com.financeapp.backend.responses.LoginResponse;
 import com.financeapp.backend.services.AuthenticationService;
 import com.financeapp.backend.services.JwtService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.management.RuntimeErrorException;

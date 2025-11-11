@@ -19,4 +19,5 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
     Optional<User> findByRefreshToken(String refreshToken);
 
+    void deleteByEmail(String email);
 }

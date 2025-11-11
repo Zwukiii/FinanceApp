@@ -7,6 +7,7 @@ import com.financeapp.backend.DTO.jwt.VerifyUserDto;
 import com.financeapp.backend.model.User;
 import com.financeapp.backend.repository.UserRepository;
 import jakarta.mail.MessagingException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Optional;
 import java.util.Random;
 
@@ -121,7 +121,7 @@ public class AuthenticationService {
 
     public  TokenRefreshDTO tokenRefresh(TokenRefreshDTO input) {
         Optional<User> optionalUser = userRepository.findByRefreshToken(input.getRefreshToken());
-        if (optionalUser.isEmpty()) throw new RuntimeException("User n ot found");
+        if (optionalUser.isEmpty()) throw new RuntimeException("User not found");
         User user = optionalUser.get();
 
         if (!jwtService.isTokenValid(input.getRefreshToken(), user)) {
