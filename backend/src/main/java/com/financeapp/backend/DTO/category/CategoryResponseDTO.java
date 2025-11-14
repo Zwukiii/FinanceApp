@@ -1,6 +1,6 @@
 package com.financeapp.backend.DTO.category;
 
-import com.financeapp.backend.model.TransactionType;
+import com.financeapp.backend.enums.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

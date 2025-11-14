@@ -1,5 +1,6 @@
 package com.financeapp.backend.controller;
 
+import com.financeapp.backend.enums.Roles;
 import com.financeapp.backend.model.User;
 import com.financeapp.backend.services.UserService;
 
@@ -21,11 +22,13 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<User> authenticateUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        User currentUser = userService.findByEmail(email);
+
         return ResponseEntity.ok(currentUser);
     }
-
     @GetMapping("/")
     public ResponseEntity<List<User>> allUsers() {
         List<User> user = userService.allUsers();
@@ -41,6 +44,12 @@ public class UserController {
     public ResponseEntity<String> removeUser(@PathVariable String email) {
         userService.userDeletion(email);
         return ResponseEntity.ok("User deleted successfully");
+    }
+
+    @PostMapping("/add-role")
+    public ResponseEntity<String> addRoles(@RequestParam String email, @RequestParam Roles role) {
+        userService.addRoleToUser(email, role);
+        return ResponseEntity.ok("Role added.");
     }
 
 

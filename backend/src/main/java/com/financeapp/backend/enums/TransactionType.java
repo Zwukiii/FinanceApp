@@ -1,4 +1,4 @@
-package com.financeapp.backend.model;
+package com.financeapp.backend.enums;
 
 public enum TransactionType {
     INCOME("income"),

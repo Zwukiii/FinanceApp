@@ -1,6 +1,6 @@
 package com.financeapp.backend.DTO.transaction;
 
-import com.financeapp.backend.model.TransactionType;
+import com.financeapp.backend.enums.TransactionType;
 import lombok.Getter;
 import lombok.Setter;
 

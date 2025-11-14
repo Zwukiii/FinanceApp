@@ -31,9 +31,11 @@ public class SecurityConfiguration {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()// login, register open
-                        .requestMatchers(HttpMethod.DELETE, "/users/**").permitAll() // for delete, will add .hasRole() to admin only.
-                        .anyRequest().authenticated()              // all other endpoints need JWT
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/users/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

@@ -1,5 +1,6 @@
 package com.financeapp.backend.model;
 
+import com.financeapp.backend.enums.TransactionType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
