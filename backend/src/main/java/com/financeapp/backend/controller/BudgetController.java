@@ -25,11 +25,8 @@ public class BudgetController {
     }
 
     @PostMapping
-    public BudgetResponseDTO createBudget(@RequestBody BudgetRequestDTO dto) {
-        BudgetModel entity = budgetMapper.toEntity(dto);
-        entity.setSpentAmount(BigDecimal.ZERO);
-        BudgetModel saved = budgetService.createBudget(entity);
-        return budgetMapper.toDTO(saved);
+    public  BudgetResponseDTO createBudget(@RequestBody BudgetRequestDTO dto) {
+        return budgetService.createBudget(dto);
     }
 
     @GetMapping

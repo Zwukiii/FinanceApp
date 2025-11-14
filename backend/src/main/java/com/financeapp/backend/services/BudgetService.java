@@ -1,11 +1,14 @@
 package com.financeapp.backend.services;
 
 import com.financeapp.backend.DTO.budget.BudgetRequestDTO;
+import com.financeapp.backend.DTO.budget.BudgetResponseDTO;
+import com.financeapp.backend.exception.BudgetValidator;
 import com.financeapp.backend.mappers.BudgetMapper;
 import com.financeapp.backend.model.BudgetModel;
 import com.financeapp.backend.repository.BudgetRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.Validator;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -18,15 +21,25 @@ import java.util.stream.Collectors;
 public class BudgetService {
     private final BudgetRepository budgetRepository;
     private final BudgetMapper budgetMapper;
+    private final BudgetValidator budgetValidator;
 
-    public BudgetService(BudgetRepository budgetRepository, BudgetMapper budgetMapper) {
+
+    public BudgetService(BudgetRepository budgetRepository, BudgetMapper budgetMapper, BudgetValidator budgetValidator) {
         this.budgetRepository = budgetRepository;
         this.budgetMapper = budgetMapper;
+        this.budgetValidator = budgetValidator;
     }
 
-    public BudgetModel createBudget(BudgetModel budget) {
-        budget.setSpentAmount(BigDecimal.ZERO);
-        return budgetRepository.save(budget);
+    public BudgetResponseDTO createBudget(BudgetRequestDTO dto) {
+      if (dto == null) {
+          throw new IllegalArgumentException("dto request cannot be null");
+      }
+
+       BudgetModel entity = budgetMapper.toEntity(dto);
+       entity.setSpentAmount(BigDecimal.ZERO);
+       budgetValidator.validateForCreateBudget(entity);
+       BudgetModel saveModel = budgetRepository.save(entity);
+       return budgetMapper.toDTO(saveModel);
     }
 
     public List<BudgetModel> getAllBudgets() {
