@@ -55,5 +55,13 @@ public class TransactionController {
         return ResponseEntity.ok("Transaction deleted successfully");
     }
 
+    @GetMapping("/{id}")
+    public TransactionResponseDTO getTransactionById(@PathVariable Long id) {
+        TransactionModel transaction = transactionService.getTransactionById(id)
+                .orElseThrow(() -> new RuntimeException("Transaction not found!"));
+
+        return transactionMapper.toDTO(transaction);
+    }
+
 
 }

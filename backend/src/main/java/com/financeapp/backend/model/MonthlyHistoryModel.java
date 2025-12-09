@@ -19,6 +19,10 @@ public class MonthlyHistoryModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     private String month;
     private BigDecimal totalIncome;
     private BigDecimal totalExpenses;

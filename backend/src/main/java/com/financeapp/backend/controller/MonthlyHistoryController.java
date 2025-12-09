@@ -30,16 +30,13 @@ public class MonthlyHistoryController {
         monthlyHistoryService.generateMonthlySummary();
     }
 
-    @GetMapping
+    @GetMapping()
     public List<MonthlyHistoryResponseDTO> getAllHistory() {
-        return monthlyHistoryRepository.findAll()
+        return monthlyHistoryService.getHistoryForCurrentUser()
                 .stream()
                 .map(MonthlyHistoryMapper::toDTO)
                 .toList();
-
-
     }
-
 
     @Scheduled(cron = "0 0 0 1 * ?")
     public void autoGenerateMonthlySummary() {

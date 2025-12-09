@@ -24,6 +24,10 @@ public class TransactionModel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Column(nullable = false)
     @DecimalMin(value = "0.0", message = "Amount must be greater than 0")
     @NotNull(message = "You need to enter an amount!")

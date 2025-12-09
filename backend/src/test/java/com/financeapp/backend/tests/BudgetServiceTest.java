@@ -6,13 +6,18 @@ import com.financeapp.backend.DTO.budget.BudgetResponseDTO;
 import com.financeapp.backend.exception.BudgetValidator;
 import com.financeapp.backend.mappers.BudgetMapper;
 import com.financeapp.backend.model.BudgetModel;
+import com.financeapp.backend.model.User;
 import com.financeapp.backend.repository.BudgetRepository;
 import com.financeapp.backend.services.BudgetService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,12 +33,24 @@ public class BudgetServiceTest {
     private BudgetMapper mapper;
     private BudgetValidator validator;
     private BudgetService service;
+    private User mockUser;
 
     private BudgetRequestDTO dto;
     private BudgetModel mappedEntity;
     private BudgetModel savedEntity;
     private BudgetResponseDTO responseDTO;
 
+    private void setupSecurityContext() {
+        mockUser = new User();
+        mockUser.setId(1L);
+        mockUser.setEmail("test@test.com");
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
+        lenient().when(authentication.getPrincipal()).thenReturn(mockUser);
+        SecurityContextHolder.setContext(securityContext);
+    }
 
     @BeforeEach
     void setupSetters() {
@@ -42,6 +59,8 @@ public class BudgetServiceTest {
         validator = Mockito.mock(BudgetValidator.class);
 
         service = new BudgetService(repo, mapper, validator);
+
+        setupSecurityContext();
 
         dto = new BudgetRequestDTO();
         dto.setCategory("Food");
@@ -57,8 +76,11 @@ public class BudgetServiceTest {
         savedEntity.setSpentAmount(BigDecimal.ZERO);
 
         responseDTO = new BudgetResponseDTO();
+    }
 
-
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -142,9 +164,8 @@ public class BudgetServiceTest {
 
     @Test
     void CalculateProgress_ShouldThrowWhenBudgetNotFound() {
-        when(repo.findById(1L)).thenReturn(Optional.empty());
+        when(repo.findByIdAndUser(1L, mockUser)).thenReturn(Optional.empty());
         assertThrows(RuntimeException.class, () -> service.calculateProgress(1L));
-
     }
 
     @Test
@@ -153,12 +174,12 @@ public class BudgetServiceTest {
         budget.setSpentAmount(BigDecimal.valueOf(150));
         budget.setLimitAmount(null);
 
-        when(repo.findById(1L)).thenReturn(Optional.of(budget));
+        when(repo.findByIdAndUser(1L, mockUser)).thenReturn(Optional.of(budget));
         BigDecimal result1 = service.calculateProgress(1L);
 
         assertEquals(BigDecimal.ZERO, result1);
         budget.setLimitAmount(BigDecimal.ZERO);
-        when(repo.findById(2L)).thenReturn(Optional.of(budget));
+        when(repo.findByIdAndUser(2L, mockUser)).thenReturn(Optional.of(budget));
 
         BigDecimal result2 = service.calculateProgress(2L);
         assertEquals(BigDecimal.ZERO, result2);
@@ -166,16 +187,13 @@ public class BudgetServiceTest {
 
     @Test
     void calculateProgress_ShouldReturnCorrectPercentage() {
-        //Arrange
         BudgetModel budget = new BudgetModel();
         budget.setSpentAmount(BigDecimal.valueOf(50));
         budget.setLimitAmount(BigDecimal.valueOf(200));
 
-        //Act
-        when(repo.findById(15L)).thenReturn(Optional.of(budget));
+        when(repo.findByIdAndUser(15L, mockUser)).thenReturn(Optional.of(budget));
         BigDecimal result = service.calculateProgress(15L);
 
-        //Assert
         assertEquals(new BigDecimal("25.00"), result);
     }
 
@@ -197,12 +215,12 @@ public class BudgetServiceTest {
         saved.setCategory("Updated");
         saved.setLimitAmount(BigDecimal.valueOf(200));
 
-        when(repo.findById(id)).thenReturn(Optional.of(existing));
+        when(repo.findByIdAndUser(id, mockUser)).thenReturn(Optional.of(existing));
         when(repo.save(existing)).thenReturn(saved);
 
         BudgetModel result = service.updateBudget(id, dto);
 
-        verify(repo).findById(id);
+        verify(repo).findByIdAndUser(id, mockUser);
         verify(mapper).updateEntityFromDTO(dto, existing);
         verify(repo).save(existing);
 
@@ -214,7 +232,7 @@ public class BudgetServiceTest {
     void updateBudget_ShouldThrowWhenIdNotFound() {
         Long id = 99L;
 
-        when(repo.findById(id)).thenReturn(Optional.empty());
+        when(repo.findByIdAndUser(id, mockUser)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class,
                 () -> service.updateBudget(id, new BudgetRequestDTO()));
@@ -227,7 +245,7 @@ public class BudgetServiceTest {
         BudgetRequestDTO dto = new BudgetRequestDTO();
         BudgetModel existing = new BudgetModel();
 
-        when(repo.findById(id)).thenReturn(Optional.of(existing));
+        when(repo.findByIdAndUser(id, mockUser)).thenReturn(Optional.of(existing));
         when(repo.save(existing)).thenReturn(existing);
 
         service.updateBudget(id, dto);
@@ -242,19 +260,23 @@ public class BudgetServiceTest {
         BudgetRequestDTO dto = new BudgetRequestDTO();
         BudgetModel existing = new BudgetModel();
 
-        when(repo.findById(id)).thenReturn(Optional.of(existing));
+        when(repo.findByIdAndUser(id, mockUser)).thenReturn(Optional.of(existing));
         when(repo.save(existing)).thenReturn(existing);
 
         service.updateBudget(id, dto);
     }
 
     @Test
-    void deleteBudget_ShouldNotCallOtherRepositortyMethods() {
+    void deleteBudget_ShouldCallRepositoryMethods() {
         Long id = 1L;
+        BudgetModel existing = new BudgetModel();
+
+        when(repo.findByIdAndUser(id, mockUser)).thenReturn(Optional.of(existing));
 
         service.deleteBudget(id);
-        verify(repo).deleteById(id);
-        verifyNoMoreInteractions(repo);
+
+        verify(repo).findByIdAndUser(id, mockUser);
+        verify(repo).deleteByIdAndUser(id, mockUser);
     }
 
     @Test
@@ -266,9 +288,9 @@ public class BudgetServiceTest {
         budget.setCategory(category);
         budget.setSpentAmount(BigDecimal.valueOf(30));
 
-        when(repo.findByCategory(category)).thenReturn(Optional.of(budget));
+        when(repo.findByCategoryAndUser(category, mockUser)).thenReturn(Optional.of(budget));
 
-        service.updateSpentAmount(category, amount);
+        service.updateSpentAmount(category, amount, mockUser);
 
         assertEquals(BigDecimal.valueOf(50), budget.getSpentAmount());
         verify(repo).save(budget);
@@ -278,27 +300,27 @@ public class BudgetServiceTest {
     void updateSpentAmount_ShouldDoNothingWhenCategoryNotFound() {
         String category = "Unknown";
 
-        when(repo.findByCategory(category)).thenReturn(Optional.empty());
+        when(repo.findByCategoryAndUser(category, mockUser)).thenReturn(Optional.empty());
 
-        service.updateSpentAmount(category, BigDecimal.TEN);
+        service.updateSpentAmount(category, BigDecimal.TEN, mockUser);
 
         verify(repo, never()).save(any());
     }
 
     @Test
-    void updateSpentAmount_ShouldCallFindByCategory() {
+    void updateSpentAmount_ShouldCallFindByCategoryAndUser() {
         String category = "Food";
 
-        when(repo.findByCategory(category)).thenReturn(Optional.empty());
+        when(repo.findByCategoryAndUser(category, mockUser)).thenReturn(Optional.empty());
 
-        service.updateSpentAmount(category, BigDecimal.ONE);
+        service.updateSpentAmount(category, BigDecimal.ONE, mockUser);
 
-        verify(repo).findByCategory(category);
+        verify(repo).findByCategoryAndUser(category, mockUser);
     }
 
     @Test
     void calculateProgress_ShouldThrowWhenIdNotFound() {
-        when(repo.findById(1L)).thenReturn(Optional.empty());
+        when(repo.findByIdAndUser(1L, mockUser)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> service.calculateProgress(1L));
     }
@@ -309,7 +331,7 @@ public class BudgetServiceTest {
         budget.setSpentAmount(BigDecimal.valueOf(50));
         budget.setLimitAmount(BigDecimal.ZERO);
 
-        when(repo.findById(1L)).thenReturn(Optional.of(budget));
+        when(repo.findByIdAndUser(1L, mockUser)).thenReturn(Optional.of(budget));
 
         BigDecimal result = service.calculateProgress(1L);
 
@@ -322,7 +344,7 @@ public class BudgetServiceTest {
         budget.setSpentAmount(BigDecimal.valueOf(50));
         budget.setLimitAmount(null);
 
-        when(repo.findById(1L)).thenReturn(Optional.of(budget));
+        when(repo.findByIdAndUser(1L, mockUser)).thenReturn(Optional.of(budget));
 
         BigDecimal result = service.calculateProgress(1L);
 
@@ -335,7 +357,7 @@ public class BudgetServiceTest {
         budget.setSpentAmount(BigDecimal.valueOf(50));
         budget.setLimitAmount(BigDecimal.valueOf(200));
 
-        when(repo.findById(1L)).thenReturn(Optional.of(budget));
+        when(repo.findByIdAndUser(1L, mockUser)).thenReturn(Optional.of(budget));
 
         BigDecimal result = service.calculateProgress(1L);
 
@@ -348,7 +370,7 @@ public class BudgetServiceTest {
         budget.setSpentAmount(null);
         budget.setLimitAmount(BigDecimal.valueOf(100));
 
-        when(repo.findById(1L)).thenReturn(Optional.of(budget));
+        when(repo.findByIdAndUser(1L, mockUser)).thenReturn(Optional.of(budget));
 
         BigDecimal result = service.calculateProgress(1L);
 
@@ -356,16 +378,16 @@ public class BudgetServiceTest {
     }
 
     @Test
-    void calculateProgress_ShouldCallFindById() {
+    void calculateProgress_ShouldCallFindByIdAndUser() {
         BudgetModel budget = new BudgetModel();
         budget.setSpentAmount(BigDecimal.TEN);
         budget.setLimitAmount(BigDecimal.TEN);
 
-        when(repo.findById(1L)).thenReturn(Optional.of(budget));
+        when(repo.findByIdAndUser(1L, mockUser)).thenReturn(Optional.of(budget));
 
         service.calculateProgress(1L);
 
-        verify(repo).findById(1L);
+        verify(repo).findByIdAndUser(1L, mockUser);
     }
 
     @Test
@@ -373,9 +395,9 @@ public class BudgetServiceTest {
         BudgetModel budget = new BudgetModel();
         budget.setSpentAmount(BigDecimal.valueOf(50));
 
-        when(repo.findByCategory("Food")).thenReturn(Optional.of(budget));
+        when(repo.findByCategoryAndUser("Food", mockUser)).thenReturn(Optional.of(budget));
 
-        service.updateSpentAmount("Food", BigDecimal.valueOf(20));
+        service.updateSpentAmount("Food", BigDecimal.valueOf(20), mockUser);
 
         assertEquals(BigDecimal.valueOf(70), budget.getSpentAmount());
         verify(repo).save(budget);
@@ -383,9 +405,9 @@ public class BudgetServiceTest {
 
     @Test
     void updateSpentAmount_ShouldDoNothing_WhenBudgetDoesNotExist() {
-        when(repo.findByCategory("Unknown")).thenReturn(Optional.empty());
+        when(repo.findByCategoryAndUser("Unknown", mockUser)).thenReturn(Optional.empty());
 
-        service.updateSpentAmount("Unknown", BigDecimal.valueOf(10));
+        service.updateSpentAmount("Unknown", BigDecimal.valueOf(10), mockUser);
 
         verify(repo, never()).save(any());
     }
@@ -406,7 +428,7 @@ public class BudgetServiceTest {
         b2.setSpentAmount(BigDecimal.valueOf(10));
         b2.setLimitAmount(BigDecimal.valueOf(50));
 
-        when(repo.findAll()).thenReturn(java.util.List.of(b1, b2));
+        when(repo.findByUser(mockUser)).thenReturn(java.util.List.of(b1, b2));
 
         var result = service.getBudgetsOverLimit(category, amount);
 
@@ -421,10 +443,8 @@ public class BudgetServiceTest {
         budget.setCategory(category);
         budget.setSpentAmount(BigDecimal.valueOf(80));
         budget.setLimitAmount(BigDecimal.valueOf(100));
-        when(repo.findAll()).thenReturn(List.of(budget));
+        when(repo.findByUser(mockUser)).thenReturn(List.of(budget));
         assertThrows(RuntimeException.class, () -> service.getBudgetsOverLimit(category, amount));
-
-
     }
 
     @Test
@@ -436,7 +456,7 @@ public class BudgetServiceTest {
         budget.setCategory(category);
         budget.setSpentAmount(BigDecimal.valueOf(80));
         budget.setLimitAmount(BigDecimal.valueOf(100));
-        when(repo.findAll()).thenReturn(List.of(budget));
+        when(repo.findByUser(mockUser)).thenReturn(List.of(budget));
         assertDoesNotThrow(() -> service.getBudgetsOverLimit(category, amount));
     }
 
@@ -453,7 +473,7 @@ public class BudgetServiceTest {
         b2.setCategory(category);
         b2.setSpentAmount(BigDecimal.valueOf(10));
         b2.setLimitAmount(BigDecimal.valueOf(200));
-        when(repo.findAll()).thenReturn(List.of(b1, b2));
+        when(repo.findByUser(mockUser)).thenReturn(List.of(b1, b2));
 
         assertThrows(RuntimeException.class, () -> service.getBudgetsOverLimit(category, amount));
     }
@@ -468,7 +488,7 @@ public class BudgetServiceTest {
         b1.setSpentAmount(null);
         b1.setLimitAmount(BigDecimal.valueOf(100));
 
-        when(repo.findAll()).thenReturn(List.of(b1));
+        when(repo.findByUser(mockUser)).thenReturn(List.of(b1));
 
         assertThrows(NullPointerException.class,
                 () -> service.getBudgetsOverLimit(category, amount));
@@ -489,7 +509,7 @@ public class BudgetServiceTest {
         travel.setSpentAmount(BigDecimal.valueOf(10));
         travel.setLimitAmount(BigDecimal.valueOf(200));
 
-        when(repo.findAll()).thenReturn(List.of(food, travel));
+        when(repo.findByUser(mockUser)).thenReturn(List.of(food, travel));
 
         assertThrows(RuntimeException.class,
                 () -> service.getBudgetsOverLimit(category, amount));
@@ -502,20 +522,19 @@ public class BudgetServiceTest {
     void getAllBudgetShouldReturnList() {
         BudgetModel b1 = new BudgetModel();
         BudgetModel b2 = new BudgetModel();
-        when(repo.findAll()).thenReturn(List.of(b1, b2));
+        when(repo.findByUser(mockUser)).thenReturn(List.of(b1, b2));
         var result = service.getAllBudgets();
         assertEquals(2, result.size());
-        verify(repo).findAll();
+        verify(repo).findByUser(mockUser);
     }
 
     @Test
     void getAllBudgetByIdShouldReturnBudgetWhenThere() {
         BudgetModel b = new BudgetModel();
-        when(repo.findById(1L)).thenReturn(Optional.of(b));
+        when(repo.findByIdAndUser(1L, mockUser)).thenReturn(Optional.of(b));
         var result = service.getBudgetById(1L);
         assertTrue(result.isPresent());
         assertEquals(b, result.get());
-
     }
 
     @Test
@@ -536,10 +555,10 @@ public class BudgetServiceTest {
     void getBudgetsOverLimit_shouldReturnFromRepository() {
         BudgetModel b1 = new BudgetModel();
         BudgetModel b2 = new BudgetModel();
-        when(repo.findBudgetsOverLimit()).thenReturn(List.of(b1,b2));
+        when(repo.findBudgetsOverLimitByUser(mockUser)).thenReturn(List.of(b1, b2));
         var result = service.getBudgetsOverLimit();
         assertEquals(2, result.size());
-        verify(repo).findBudgetsOverLimit();
+        verify(repo).findBudgetsOverLimitByUser(mockUser);
     }
 
 }
