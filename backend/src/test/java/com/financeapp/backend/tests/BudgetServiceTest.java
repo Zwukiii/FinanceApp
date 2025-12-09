@@ -498,4 +498,48 @@ public class BudgetServiceTest {
     }
 
 
+    @Test
+    void getAllBudgetShouldReturnList() {
+        BudgetModel b1 = new BudgetModel();
+        BudgetModel b2 = new BudgetModel();
+        when(repo.findAll()).thenReturn(List.of(b1, b2));
+        var result = service.getAllBudgets();
+        assertEquals(2, result.size());
+        verify(repo).findAll();
+    }
+
+    @Test
+    void getAllBudgetByIdShouldReturnBudgetWhenThere() {
+        BudgetModel b = new BudgetModel();
+        when(repo.findById(1L)).thenReturn(Optional.of(b));
+        var result = service.getBudgetById(1L);
+        assertTrue(result.isPresent());
+        assertEquals(b, result.get());
+
+    }
+
+    @Test
+    void resetMonthlyBudgets_shouldResetAndSaveEachBudget() {
+        BudgetModel b1 = new BudgetModel();
+        b1.setSpentAmount(BigDecimal.valueOf(150));
+        BudgetModel b2 = new BudgetModel();
+        b2.setSpentAmount(BigDecimal.valueOf(200));
+
+        when(repo.findAll()).thenReturn(List.of(b1, b2));
+        service.resetMonthlyBudgets();
+        assertEquals(BigDecimal.ZERO, b1.getSpentAmount());
+        assertEquals(BigDecimal.ZERO, b2.getSpentAmount());
+        verify(repo, times(2)).save(any());
+    }
+
+    @Test
+    void getBudgetsOverLimit_shouldReturnFromRepository() {
+        BudgetModel b1 = new BudgetModel();
+        BudgetModel b2 = new BudgetModel();
+        when(repo.findBudgetsOverLimit()).thenReturn(List.of(b1,b2));
+        var result = service.getBudgetsOverLimit();
+        assertEquals(2, result.size());
+        verify(repo).findBudgetsOverLimit();
+    }
+
 }
